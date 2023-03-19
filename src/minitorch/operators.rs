@@ -143,6 +143,7 @@ mod tests {
     #[rstest]
     #[case(gen_float())]
     fn test_sigmoid(#[case] input: f64) {
+        // Test sigmoid properties
         assert!(0.0 <= sigmoid(input) && sigmoid(input) <= 1.0);
         assert_close(1.0 - sigmoid(input), sigmoid(-input));
         assert_close(sigmoid(0.0), 0.5);
@@ -151,5 +152,34 @@ mod tests {
             && sigmoid(input) >= sigmoid(input - 1.0)
             && sigmoid(input - 1.0)>= 0.0
         );
+    }
+
+    #[rstest]
+    #[case(gen_float(), gen_float(), gen_float())]
+    fn test_transitive(#[case] input_1: f64, #[case] input_2: f64, #[case] input_3: f64) {
+        /* Test the transitive property -- if a<b and b<c then a<c */
+        let mut sorted = vec![input_1, input_2, input_3];
+        sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        let a = sorted[0];
+        let b = sorted[1];
+        let c = sorted[2];
+        if lt(a, b) + lt(b, c) == 2.0 {
+            assert!(lt(a, c) == 1.0);
+        }
+    }
+
+    #[rstest]
+    #[case(gen_float(), gen_float())]
+    fn test_commutative(#[case] input_1: f64, #[case] input_2: f64) {
+        /* Test the commutative property of addition and multiplication */
+        assert_close(add(input_1, input_2), add(input_2, input_1));
+        assert_close(mul(input_1, input_2), mul(input_2, input_1));
+    }
+
+    #[rstest]
+    #[case(gen_float(), gen_float(), gen_float())]
+    fn test_distributive(#[case] input_1: f64, #[case] input_2: f64, #[case] input_3: f64) {
+        /* Test the distributive property of multiplication over addition */
+        assert_close(mul(input_1, add(input_2, input_3)), add(mul(input_1, input_2), mul(input_1, input_3)));
     }
 }
