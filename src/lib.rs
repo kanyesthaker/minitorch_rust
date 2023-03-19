@@ -1,3 +1,5 @@
+use rand::Rng;
+
 mod minitorch;
 
 pub fn add(left: usize, right: usize) -> usize {
@@ -21,5 +23,9 @@ mod test_utils {
 
     pub fn assert_close(a: f64, b: f64) {
         assert!(minitorch::operators::is_close(a, b) != 0.0, "Failure! x={} y={}", a, b)
+    }
+
+    pub fn gen_float() -> f64 {
+        rand::thread_rng().gen_range(-100.0..100.0)
     }
 }
