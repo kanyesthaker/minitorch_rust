@@ -1,5 +1,3 @@
-use std::iter::Iterator;
-
 pub fn mul(x: f64, y: f64) -> f64 {
     x * y
 }
@@ -274,7 +272,6 @@ mod tests {
     fn test_prod(#[case] a: f64, #[case] b: f64, #[case] c: f64) {
         let v = vec![a, b, c];
         assert_close(prod(v), a * b * c);
-    }
-
- 
+    } 
 }
+
