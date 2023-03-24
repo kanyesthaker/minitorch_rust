@@ -1,3 +1,5 @@
+use std::iter::Iterator;
+
 pub fn mul(x: f64, y: f64) -> f64 {
     x * y
 }
@@ -74,6 +76,17 @@ pub fn exp(x: f64) -> f64 {
     f64::exp(x)
 }
 
+pub fn map<F>(func: F) -> impl Fn(Vec<f64>) -> Vec<f64> 
+where 
+    F: Fn(f64) -> f64
+{
+    move |iterable: Vec<f64>| -> Vec<f64> {
+        iterable.into_iter().map(|value| func(value)).collect::<Vec<f64>>()
+    }
+}
+
+
+// Tests
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -181,5 +194,13 @@ mod tests {
     fn test_distributive(#[case] input_1: f64, #[case] input_2: f64, #[case] input_3: f64) {
         /* Test the distributive property of multiplication over addition */
         assert_close(mul(input_1, add(input_2, input_3)), add(mul(input_1, input_2), mul(input_1, input_3)));
+    }
+
+    #[rstest]
+    #[case(gen_float(), gen_float())]
+    fn test_map_id(#[case] input_1: f64, #[case] input_2: f64) {
+        let map_id = map(id);
+        let v = vec![input_1, input_2];
+        assert!(map_id(v.clone()) == v);
     }
 }
