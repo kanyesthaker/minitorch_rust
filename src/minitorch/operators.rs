@@ -80,11 +80,49 @@ pub fn map<F>(func: F) -> impl Fn(Vec<f64>) -> Vec<f64>
 where 
     F: Fn(f64) -> f64
 {
-    move |iterable: Vec<f64>| -> Vec<f64> {
-        iterable.into_iter().map(|value| func(value)).collect::<Vec<f64>>()
+    move |v: Vec<f64>| -> Vec<f64> {
+        v.into_iter().map(|x| func(x)).collect::<Vec<f64>>()
     }
 }
 
+pub fn neg_list(v: Vec<f64>) -> Vec<f64> {
+    let map_neg = map(neg);
+    map_neg(v)
+}
+
+pub fn zip_with<F>(func: F) -> impl Fn(Vec<f64>, Vec<f64>) -> Vec<f64>
+where
+    F: Fn(f64, f64) -> f64
+{
+    move |v_1: Vec<f64>, v_2: Vec<f64>| -> Vec<f64> {
+        let zipped = v_1.into_iter().zip(v_2.into_iter());
+        zipped.map(|(x, y)| func(x, y)).collect::<Vec<f64>>()
+    }
+}
+
+pub fn add_lists(v_1: Vec<f64>, v_2: Vec<f64>) -> Vec<f64> {
+    let zip_add = zip_with(add);
+    zip_add(v_1, v_2)
+}
+
+pub fn reduce<F>(func: F, start: f64) -> impl Fn(Vec<f64>) -> f64
+where
+    F: Fn(f64, f64) -> f64
+{
+    move |v: Vec<f64>| -> f64 {
+        v.into_iter().fold(start, |a, b| func(a, b))
+    }
+}
+
+pub fn sum(v: Vec<f64>) -> f64 {
+    let adder = reduce(add, 0.0);
+    adder(v)
+}
+
+pub fn prod(v: Vec<f64>) -> f64 {
+    let multiplier = reduce(mul, 1.0);
+    multiplier(v)
+}
 
 // Tests
 #[cfg(test)]
@@ -203,4 +241,40 @@ mod tests {
         let v = vec![input_1, input_2];
         assert!(map_id(v.clone()) == v);
     }
+
+    #[rstest]
+    #[case(gen_float(), gen_float(), gen_float())]
+    fn test_neg_list(#[case] input_1: f64, #[case] input_2: f64, #[case] input_3: f64) {
+        let v = vec![input_1, input_2, input_3];
+        let inv_v = neg_list(v.clone());
+        assert!(v[0] == -inv_v[0]);
+        assert!(v[1] == -inv_v[1]);
+        assert!(v[2] == -inv_v[2]);
+    }
+
+    #[rstest]
+    #[case(gen_float(), gen_float(), gen_float(), gen_float())]
+    fn test_zip_with(#[case] a: f64, #[case] b: f64, #[case] c: f64, #[case] d: f64) {
+        let v_1 = vec![a, b];
+        let v_2 = vec![c, d];
+        let added_vs = add_lists(v_1.clone(), v_2.clone());
+        assert!(added_vs[0] == a + c);
+        assert!(added_vs[1] == b + d);
+    }
+
+    #[rstest]
+    #[case(gen_float(), gen_float(), gen_float())]
+    fn test_sum(#[case] a: f64, #[case] b: f64, #[case] c: f64) {
+        let v = vec![a, b, c];
+        assert_close(sum(v), a + b + c);
+    }
+
+    #[rstest]
+    #[case(gen_float(), gen_float(), gen_float())]
+    fn test_prod(#[case] a: f64, #[case] b: f64, #[case] c: f64) {
+        let v = vec![a, b, c];
+        assert_close(prod(v), a * b * c);
+    }
+
+ 
 }
