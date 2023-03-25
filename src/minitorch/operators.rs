@@ -264,14 +264,14 @@ mod tests {
     #[case(gen_float(), gen_float(), gen_float())]
     fn test_sum(#[case] a: f64, #[case] b: f64, #[case] c: f64) {
         let v = vec![a, b, c];
-        assert_close(sum(v), a + b + c);
+        assert_close(sum(v.clone()), a + b + c);
     }
 
     #[rstest]
     #[case(gen_float(), gen_float(), gen_float())]
     fn test_prod(#[case] a: f64, #[case] b: f64, #[case] c: f64) {
         let v = vec![a, b, c];
-        assert_close(prod(v), a * b * c);
+        assert_close(prod(v.clone()), a * b * c);
     } 
 }
 
